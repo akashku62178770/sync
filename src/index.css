@@ -1,68 +1,154 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --color-background: oklch(99% 0 0);
+  --color-foreground: oklch(20% 0.02 250);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(20% 0.02 250);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(20% 0.02 250);
+  --color-primary: oklch(70% 0.2 265);
+  --color-primary-foreground: oklch(100% 0 0);
+  --color-secondary: oklch(96% 0.01 250);
+  --color-secondary-foreground: oklch(20% 0.02 250);
+  --color-muted: oklch(96% 0.01 250);
+  --color-muted-foreground: oklch(55% 0.02 250);
+  --color-accent: oklch(96% 0.01 250);
+  --color-accent-foreground: oklch(20% 0.02 250);
+  --color-destructive: oklch(60% 0.2 25);
+  --color-destructive-foreground: oklch(100% 0 0);
+  --color-success: oklch(50% 0.15 145);
+  --color-success-foreground: oklch(100% 0 0);
+  --color-warning: oklch(65% 0.2 50);
+  --color-warning-foreground: oklch(100% 0 0);
+  --color-border: oklch(92% 0.01 250);
+  --color-input: oklch(92% 0.01 250);
+  --color-ring: oklch(70% 0.2 265);
+  --radius: 0.625rem;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: oklch(20% 0.02 250);
+    --color-foreground: oklch(98% 0.01 250);
+    --color-card: oklch(25% 0.02 250);
+    --color-border: oklch(30% 0.02 250);
+  }
 }
-a:hover {
-  color: #535bf2;
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Component utilities */
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+.metric-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, oklch(70% 0.2 265 / 0.05), transparent);
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+.metric-card:hover::before {
+  opacity: 1;
+}
+
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.severity-badge-high {
+  background-color: var(--color-severity-high-bg);
+  color: var(--color-severity-high);
+}
+
+.severity-badge-medium {
+  background-color: var(--color-severity-medium-bg);
+  color: var(--color-severity-medium);
+}
+
+.severity-badge-low {
+  background-color: var(--color-severity-low-bg);
+  color: var(--color-severity-low);
+}
+
+.insight-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  padding: 1.25rem;
+  transition: all 200ms;
+  box-shadow: var(--shadow-sm);
+}
+
+.insight-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: oklch(70% 0.2 265 / 0.2);
+}
+
+.glass-panel {
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  background: oklch(from var(--color-card) l c h / 0.8);
+  backdrop-filter: blur(24px);
+  box-shadow: var(--shadow-lg);
+}
+
+ 
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
 }

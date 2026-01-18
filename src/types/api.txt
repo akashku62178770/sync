@@ -1,0 +1,127 @@
+// User types
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  plan_type: 'free' | 'pro' | 'enterprise';
+  primary_goal: 'conversions' | 'roas' | 'traffic' | 'revenue';
+  created_at: string;
+  onboarding_completed: boolean;
+}
+
+// Insight types
+export type InsightSeverity = 'low' | 'medium' | 'high';
+export type InsightStatus = 'active' | 'snoozed' | 'resolved';
+
+export interface Insight {
+  id: string;
+  title: string;
+  explanation: string;
+  recommended_action: string;
+  severity: InsightSeverity;
+  status: InsightStatus;
+  created_at: string;
+  source: 'ga4' | 'meta' | 'clarity';
+}
+
+// Metrics types
+export interface DailyMetric {
+  date: string;
+  page: string;
+  sessions: number;
+  conversions: number;
+  revenue: number;
+  conversion_rate: number;
+}
+
+export interface ClaritySignal {
+  page: string;
+  rage_clicks: number;
+  dead_clicks: number;
+  quick_backs: number;
+  scroll_depth: number;
+}
+
+export interface SessionRecording {
+  id: string;
+  url: string;
+  duration: number;
+  page: string;
+  has_rage_click: boolean;
+}
+
+// Dashboard types
+export interface DashboardSummary {
+  todays_issues: number;
+  week_total: number;
+  severity_breakdown: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  metrics: {
+    sessions: number;
+    conversions: number;
+    revenue: number;
+    spend: number;
+    conversion_rate: number;
+  };
+  metrics_change: {
+    sessions: number;
+    conversions: number;
+    revenue: number;
+    spend: number;
+    conversion_rate: number;
+  };
+  date: string;
+}
+
+export interface TodaysIssues {
+  issues: Insight[];
+  total: number;
+}
+
+export interface InsightDetail {
+  insight: Insight;
+  metrics: DailyMetric[];
+  clarity_signals: ClaritySignal[];
+  recordings: SessionRecording[];
+}
+
+// Integration types
+export interface GAProperty {
+  id: string;
+  name: string;
+  website_url: string;
+  selected: boolean;
+}
+
+export interface MetaAdAccount {
+  id: string;
+  name: string;
+  currency: string;
+  selected: boolean;
+}
+
+export interface IntegrationAccount {
+  id: string;
+  type: 'google' | 'meta' | 'clarity';
+  name: string;
+  connected_at: string;
+  status: 'active' | 'error' | 'pending';
+  properties?: GAProperty[];
+  ad_accounts?: MetaAdAccount[];
+}
+
+export interface IntegrationsResponse {
+  google: IntegrationAccount | null;
+  meta: IntegrationAccount | null;
+  clarity: IntegrationAccount | null;
+}
+
+// History params
+export interface InsightHistoryParams {
+  days?: number;
+  severity?: InsightSeverity;
+  status?: InsightStatus;
+}

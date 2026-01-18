@@ -39,7 +39,7 @@ interface FeatureFlagsSlice {
   setFeature: (feature: keyof FeatureFlagsSlice['features'], value: boolean) => void;
 }
 
-// Notifications slice (client-side only)
+// Notifications slice
 interface NotificationsSlice {
   notifications: Array<{
     id: string;
@@ -47,7 +47,7 @@ interface NotificationsSlice {
     message: string;
     timestamp: number;
   }>;
-  addNotification: (type: NotificationsSlice['notifications'][0]['type'], message: string) => void;
+  addNotification: (type: 'success' | 'error' | 'warning' | 'info', message: string) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
 }
@@ -116,7 +116,7 @@ export const useStore = create<Store>()(
             notifications: [
               ...state.notifications,
               {
-                id: `${Date.now()}-${Math.random()}`,
+                id: crypto.randomUUID(),
                 type,
                 message,
                 timestamp: Date.now(),
@@ -132,7 +132,6 @@ export const useStore = create<Store>()(
       {
         name: 'app-storage',
         partialize: (state) => ({
-          // Only persist these fields
           theme: state.theme,
           sidebarOpen: state.sidebarOpen,
           onboardingCompleted: state.onboardingCompleted,
@@ -144,38 +143,38 @@ export const useStore = create<Store>()(
   )
 );
 
-// Selectors for better performance
-export const useAuth = () => useStore((state) => ({
-  isAuthenticated: state.isAuthenticated,
-  setTokens: state.setTokens,
-  clearTokens: state.clearTokens,
-}));
+// Optimized selectors - use individual selectors to prevent re-renders
+export const useAuth = () => ({
+  isAuthenticated: useStore((state) => state.isAuthenticated),
+  setTokens: useStore((state) => state.setTokens),
+  clearTokens: useStore((state) => state.clearTokens),
+});
 
-export const useUI = () => useStore((state) => ({
-  sidebarOpen: state.sidebarOpen,
-  theme: state.theme,
-  toggleSidebar: state.toggleSidebar,
-  setSidebarOpen: state.setSidebarOpen,
-  setTheme: state.setTheme,
-}));
+export const useUI = () => ({
+  sidebarOpen: useStore((state) => state.sidebarOpen),
+  theme: useStore((state) => state.theme),
+  toggleSidebar: useStore((state) => state.toggleSidebar),
+  setSidebarOpen: useStore((state) => state.setSidebarOpen),
+  setTheme: useStore((state) => state.setTheme),
+});
 
-export const useOnboarding = () => useStore((state) => ({
-  onboardingStep: state.onboardingStep,
-  onboardingCompleted: state.onboardingCompleted,
-  setOnboardingStep: state.setOnboardingStep,
-  completeOnboarding: state.completeOnboarding,
-  resetOnboarding: state.resetOnboarding,
-}));
+export const useOnboarding = () => ({
+  onboardingStep: useStore((state) => state.onboardingStep),
+  onboardingCompleted: useStore((state) => state.onboardingCompleted),
+  setOnboardingStep: useStore((state) => state.setOnboardingStep),
+  completeOnboarding: useStore((state) => state.completeOnboarding),
+  resetOnboarding: useStore((state) => state.resetOnboarding),
+});
 
-export const useFeatureFlags = () => useStore((state) => ({
-  features: state.features,
-  toggleFeature: state.toggleFeature,
-  setFeature: state.setFeature,
-}));
+export const useFeatureFlags = () => ({
+  features: useStore((state) => state.features),
+  toggleFeature: useStore((state) => state.toggleFeature),
+  setFeature: useStore((state) => state.setFeature),
+});
 
-export const useNotifications = () => useStore((state) => ({
-  notifications: state.notifications,
-  addNotification: state.addNotification,
-  removeNotification: state.removeNotification,
-  clearNotifications: state.clearNotifications,
-}));
+export const useNotifications = () => ({
+  notifications: useStore((state) => state.notifications),
+  addNotification: useStore((state) => state.addNotification),
+  removeNotification: useStore((state) => state.removeNotification),
+  clearNotifications: useStore((state) => state.clearNotifications),
+});
