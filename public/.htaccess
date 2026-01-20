@@ -1,0 +1,12 @@
+RewriteEngine On
+RewriteBase /
+
+# Redirect www to non-www
+RewriteCond %{HTTP_HOST} ^www\.gulshansehatsaathi\.com [NC]
+RewriteRule ^(.*)$ https://gulshansehatsaathi.com/$1 [L,R=301]
+
+# React SPA routing
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]

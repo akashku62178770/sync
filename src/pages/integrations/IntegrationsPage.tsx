@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Link2, 
-  Check, 
-  X, 
-  ExternalLink, 
+import {
+  Link2,
+  Check,
+  X,
+  ExternalLink,
   ChevronRight,
   Plus,
   RefreshCw,
   Settings2
 } from 'lucide-react';
-import { 
-  useIntegrations, 
-  useConnectGoogle, 
+import {
+  useIntegrations,
+  useConnectGoogle,
   useConnectMeta,
   useConnectClarity,
   useDisconnectIntegration,
@@ -123,12 +123,12 @@ function IntegrationCard({
             </div>
           </div>
           {connected && (
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className={
                 status === 'active' ? 'border-success/30 text-success' :
-                status === 'error' ? 'border-destructive/30 text-destructive' :
-                'border-warning/30 text-warning'
+                  status === 'error' ? 'border-destructive/30 text-destructive' :
+                    'border-warning/30 text-warning'
               }
             >
               {status === 'active' ? 'Connected' : status === 'error' ? 'Error' : 'Pending'}
@@ -153,10 +153,10 @@ function IntegrationCard({
                 Settings
               </Button>
             )}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2 text-destructive hover:text-destructive" 
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-destructive hover:text-destructive"
               onClick={onDisconnect}
               disabled={isPending}
             >
@@ -165,9 +165,9 @@ function IntegrationCard({
             </Button>
           </>
         ) : (
-          <Button 
-            size="sm" 
-            className="gap-2" 
+          <Button
+            size="sm"
+            className="gap-2"
             onClick={onConnect}
             disabled={isPending}
           >
@@ -185,11 +185,12 @@ function IntegrationCard({
 }
 
 export default function IntegrationsPage() {
+  console.log("Rendering IntegrationsPage", import.meta.env.VITE_GOOGLE_CLIENT_ID);
   const { addNotification } = useNotifications();
   const { data: integrations, isLoading } = useIntegrations();
   const { data: gaProperties } = useGAProperties();
   const { data: metaAccounts } = useMetaAccounts();
-  
+
   const connectGoogle = useConnectGoogle();
   const connectMeta = useConnectMeta();
   const connectClarity = useConnectClarity();
@@ -204,34 +205,141 @@ export default function IntegrationsPage() {
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [clarityForm, setClarityForm] = useState({ api_key: '', project_id: '' });
 
-  const handleGoogleConnect = () => {
-    // In real app, this would redirect to Google OAuth
-    connectGoogle.mutate(
-      { code: 'mock-oauth-code' },
-      {
-        onSuccess: () => {
-          setShowGAModal(true);
-          addNotification('success', 'Google connected! Select your properties.');
-        },
-        onError: () => addNotification('error', 'Failed to connect Google'),
-      }
+  const openOAuthPopup = (url: string, title: string) => {
+    const width = 600;
+    const height = 700;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    const popup = window.open(
+      url,
+      title,
+      `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=1,status=1,resizable=1,location=1,menuBar=0`
     );
+
+    return popup;
   };
 
-  const handleMetaConnect = () => {
-    connectMeta.mutate(
-      { code: 'mock-oauth-code' },
-      {
-        onSuccess: () => {
-          setShowMetaModal(true);
-          addNotification('success', 'Meta connected! Select your ad accounts.');
-        },
-        onError: () => addNotification('error', 'Failed to connect Meta'),
+
+
+
+
+  // Re-implementing with cleaner Promise wrapper
+  const initiateOAuth = (url: string, provider: 'google' | 'meta'): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const popup = openOAuthPopup(url, `Connect ${provider}`);
+
+      if (!popup) {
+        reject(new Error('Popup blocked or failed to open'));
+        return;
       }
-    );
+
+      let isResolved = false;
+
+      const handler = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+
+        const { type, code, error } = event.data;
+
+        if (type === 'OAUTH_SUCCESS' && code) {
+          isResolved = true;
+          window.removeEventListener('message', handler);
+          // Popup closes itself in the callback page usually, but we can ensure it
+          // popup.close(); 
+          resolve(code);
+        } else if (type === 'OAUTH_ERROR') {
+          isResolved = true;
+          window.removeEventListener('message', handler);
+          reject(new Error(error || 'Authentication error'));
+        }
+      };
+
+      window.addEventListener('message', handler);
+
+      const timer = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(timer);
+          window.removeEventListener('message', handler);
+          if (!isResolved) {
+            // User closed the window without finishing
+            // We can just ignore or reject.
+          }
+        }
+      }, 500);
+    });
+  };
+
+  const handleGoogleConnect = async () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      addNotification('error', 'Configuration Error: VITE_GOOGLE_CLIENT_ID is missing');
+      return;
+    }
+
+    const redirectUri = `${window.location.origin}/integrations/google/callback`;
+    const scope = "https://www.googleapis.com/auth/analytics.readonly";
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
+
+    try {
+      const code = await initiateOAuth(authUrl, 'google');
+      connectGoogle.mutate(
+        { code },
+        {
+          onSuccess: () => {
+            setShowGAModal(true);
+            addNotification('success', 'Google connected! Select your properties.');
+          },
+          onError: () => addNotification('error', 'Failed to connect Google'),
+        }
+      );
+    } catch (error) {
+      console.error('Google Auth Error:', error);
+      // Don't show error if user just closed the popup
+    }
+  };
+
+  const handleMetaConnect = async () => {
+    const clientId = import.meta.env.VITE_META_CLIENT_ID;
+    if (!clientId) {
+      addNotification('error', 'Configuration Error: VITE_META_CLIENT_ID is missing');
+      return;
+    }
+
+    const redirectUri = `${window.location.origin}/integrations/meta/callback`;
+    const scope = "ads_read,read_insights";
+    // Meta URL structure
+    const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=meta_connect&scope=${scope}`;
+
+    try {
+      const code = await initiateOAuth(authUrl, 'meta');
+      connectMeta.mutate(
+        { code },
+        {
+          onSuccess: () => {
+            setShowMetaModal(true);
+            addNotification('success', 'Meta connected! Select your ad accounts.');
+          },
+          onError: () => addNotification('error', 'Failed to connect Meta'),
+        }
+      );
+    } catch (error) {
+      console.error('Meta Auth Error:', error);
+    }
   };
 
   const handleClarityConnect = () => {
+    // Clarity uses API Key, no OAuth, so we just open the modal
+    // But verify if we need to do anything else.
+    // The current implementation directly calls mutate in handleClarityConnect?
+    // Wait, line 243 in original file:
+    // const handleClarityConnect = () => { connectClarity.mutate... }
+    // This looks like it submits the form.
+    // The button that triggers "Connect" in the card calls "onConnect={() => setShowClarityModal(true)}" (line 339)
+    // The modal's "Connect Clarity" button calls "handleClarityConnect" (line 460).
+    // So the existing flow IS: Click Card -> Open Modal -> Fill Form -> Click Button -> Mutate.
+    // That is correct for API Key.
+    // I will just keep the submission logic here.
+
     connectClarity.mutate(clarityForm, {
       onSuccess: () => {
         setShowClarityModal(false);
@@ -447,8 +555,8 @@ export default function IntegrationsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowClarityModal(false)}>Cancel</Button>
-            <Button 
-              onClick={handleClarityConnect} 
+            <Button
+              onClick={handleClarityConnect}
               disabled={connectClarity.isPending || !clarityForm.api_key || !clarityForm.project_id}
             >
               {connectClarity.isPending ? 'Connecting...' : 'Connect Clarity'}

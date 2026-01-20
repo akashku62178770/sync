@@ -7,6 +7,7 @@ import { useNotifications } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function LoginPage() {
   console.count("render")
   const login = useLogin();
   const googleAuth = useGoogleAuth();
+  const clientId = "616678010160-rtfbp3m2mdcc8gm0cgfq4lvkqpc5r7u8.apps.googleusercontent.com";
 
   const [formData, setFormData] = useState({
     email: '',
@@ -32,21 +34,16 @@ export default function LoginPage() {
       },
     });
   };
+  const handleLoginSuccess = () => {
+    addNotification('success', 'Welcome back!');
+    // navigate('/dashboard');
+  }
 
   const handleGoogleLogin = () => {
-    // In real app, this would redirect to Google OAuth
-    googleAuth.mutate(
-      { code: 'mock-oauth-code' },
-      {
-        onSuccess: () => {
-          addNotification('success', 'Welcome back!');
-          navigate('/dashboard');
-        },
-        onError: () => {
-          addNotification('error', 'Google login failed');
-        },
-      }
-    );
+    // const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&redirect_uri=${window.location.origin}/auth/google/callback&response_type=code&scope=email profile`;
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${window.location.origin}/auth/google/callback&response_type=code&scope=email profile`;
+    window.location.href = googleAuthUrl;
+    
   };
 
   return (
@@ -144,6 +141,16 @@ export default function LoginPage() {
         )}
         Continue with Google
       </Button>
+      {/* <GoogleOAuthProvider clientId={clientId}>
+        <GoogleLogin
+          onSuccess={handleLoginSuccess}
+          onError={() => console.log("Login Failed1")}
+          theme="filled_black"
+          size="large"
+          text="continue_with"
+          shape="rectangular"
+        />
+      </GoogleOAuthProvider> */}
 
       <p className="text-center text-sm text-muted-foreground mt-6">
         Don't have an account?{' '}

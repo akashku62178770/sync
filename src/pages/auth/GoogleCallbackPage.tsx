@@ -15,6 +15,7 @@ export default function GoogleCallbackPage() {
     const error = searchParams.get('error');
 
     if (error) {
+      console.error("Google authentication error:", error);
       addNotification('error', 'Google authentication failed');
       navigate('/login');
       return;
@@ -22,18 +23,25 @@ export default function GoogleCallbackPage() {
 
     if (code) {
       googleAuth.mutate(
-        { code },
-        {
-          onSuccess: () => {
-            addNotification('success', 'Successfully logged in!');
-            navigate('/dashboard');
-          },
-          onError: () => {
-            addNotification('error', 'Failed to complete authentication');
-            navigate('/login');
-          },
-        }
+        { code }
+        // {
+        //   onSuccess: () => {
+        //     console.log('Google authentication successful');
+        //     addNotification('success', 'Successfully logged in!');
+        //     navigate('/dashboard');
+        //   },
+        //   onError: () => {
+        //     console.error('Google authentication failed');
+        //     addNotification('error', 'Failed to complete authentication');
+        //     navigate('/login');
+        //   },
+        // }
       );
+
+      // Then check mutation status to navigate
+      if (googleAuth.isSuccess) {
+        navigate(googleAuth.data.is_new_user ? '/onboarding' : '/dashboard');
+      }
     } else {
       navigate('/login');
     }

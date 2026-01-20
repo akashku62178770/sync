@@ -143,27 +143,27 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard 
           label="Total Sessions" 
-          value={summary.metrics.sessions} 
-          change={summary.metrics_change.sessions}
+          value={summary?.metrics?.sessions} 
+          change={summary?.metrics_change?.sessions}
           icon={Users}
         />
         <MetricCard 
           label="Conversions" 
-          value={summary.metrics.conversions} 
-          change={summary.metrics_change.conversions}
+          value={summary?.metrics?.conversions} 
+          change={summary?.metrics_change?.conversions}
           icon={Target}
         />
         <MetricCard 
           label="Revenue" 
-          value={summary.metrics.revenue} 
-          change={summary.metrics_change.revenue}
+          value={summary?.metrics?.revenue} 
+          change={summary?.metrics_change?.revenue}
           icon={DollarSign}
           format="currency"
         />
         <MetricCard 
           label="Conversion Rate" 
-          value={summary.metrics.conversion_rate} 
-          change={summary.metrics_change.conversion_rate}
+          value={summary?.metrics?.conversion_rate} 
+          change={summary?.metrics_change?.conversion_rate}
           icon={Zap}
           format="percent"
         />
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <h2 className="font-semibold">Today's Issues</h2>
-                  <p className="text-sm text-muted-foreground">{summary.todays_issues} issues need attention</p>
+                  <p className="text-sm text-muted-foreground">{summary?.todays_issues} issues need attention</p>
                 </div>
               </div>
               <Link to="/issues">
@@ -195,26 +195,26 @@ export default function DashboardPage() {
             <div className="p-5">
               {/* Severity breakdown */}
               <div className="flex flex-wrap gap-3 mb-6">
-                <SeverityBadge severity="high" count={summary.severity_breakdown.high} />
-                <SeverityBadge severity="medium" count={summary.severity_breakdown.medium} />
-                <SeverityBadge severity="low" count={summary.severity_breakdown.low} />
+                <SeverityBadge severity="high" count={summary?.severity_breakdown.high} />
+                <SeverityBadge severity="medium" count={summary?.severity_breakdown.medium} />
+                <SeverityBadge severity="low" count={summary?.severity_breakdown.low} />
               </div>
 
               {/* Recent issues preview */}
               <div className="space-y-3">
-                {issues?.issues.slice(0, 3).map((issue) => (
+                {issues?.issues?.slice(0, 3).map((issue) => (
                   <Link 
-                    key={issue.id} 
-                    to={`/issues/${issue.id}`}
+                    key={issue?.id} 
+                    to={`/issues/${issue?.id}`}
                     className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                   >
                     <div className={`h-2 w-2 rounded-full ${
-                      issue.severity === 'high' ? 'bg-severity-high' : 
-                      issue.severity === 'medium' ? 'bg-severity-medium' : 
+                      issue?.severity === 'high' ? 'bg-severity-high' : 
+                      issue?.severity === 'medium' ? 'bg-severity-medium' : 
                       'bg-severity-low'
                     }`} />
-                    <span className="flex-1 text-sm font-medium truncate">{issue.title}</span>
-                    <span className="text-xs text-muted-foreground capitalize">{issue.source}</span>
+                    <span className="flex-1 text-sm font-medium truncate">{issue?.title}</span>
+                    <span className="text-xs text-muted-foreground capitalize">{issue?.source}</span>
                   </Link>
                 ))}
               </div>
@@ -230,16 +230,16 @@ export default function DashboardPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b">
                 <span className="text-sm text-muted-foreground">Total Issues</span>
-                <span className="font-semibold">{summary.week_total}</span>
+                <span className="font-semibold">{summary?.week_total}</span>
               </div>
               <div className="flex items-center justify-between py-3 border-b">
                 <span className="text-sm text-muted-foreground">Ad Spend</span>
-                <span className="font-semibold">${summary.metrics.spend.toLocaleString()}</span>
+                <span className="font-semibold">${summary?.metrics?.spend.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between py-3">
                 <span className="text-sm text-muted-foreground">Avg. ROAS</span>
                 <span className="font-semibold">
-                  {(summary.metrics.revenue / summary.metrics.spend).toFixed(2)}x
+                  {(summary?.metrics?.revenue / summary?.metrics?.spend).toFixed(2)}x
                 </span>
               </div>
             </div>

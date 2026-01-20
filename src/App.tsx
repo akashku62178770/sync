@@ -19,6 +19,7 @@ import OnboardingPage from "./pages/onboarding/OnboardingPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import GoogleCallbackPage from "./pages/auth/GoogleCallbackPage";
+import IntegrationCallbackPage from "./pages/integrations/IntegrationCallbackPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,10 +37,12 @@ const App = () => (
             <Route path="/register" element={<RegisterPage />} />
           </Route>
           <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
-          
+          <Route path="/integrations/google/callback" element={<IntegrationCallbackPage />} />
+          <Route path="/integrations/meta/callback" element={<IntegrationCallbackPage />} />
+
           {/* Onboarding */}
           <Route path="/onboarding" element={<OnboardingPage />} />
-          
+
           {/* Dashboard routes */}
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
@@ -49,7 +52,7 @@ const App = () => (
             <Route path="/integrations" element={<IntegrationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
-          
+
           {/* Redirects */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
