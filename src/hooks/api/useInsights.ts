@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { axiosInstance, extractData } from '@/lib/axios';
+import { axiosInstance, extractData, type ApiResponse } from '@/lib/axios';
 import type {
   TodaysIssues,
   InsightDetail,
@@ -12,19 +12,19 @@ import type {
 // API functions
 const insightsApi = {
   getTodaysIssues: () =>
-    axiosInstance.get<{ data: TodaysIssues }>('/insights/today/').then(extractData),
+    axiosInstance.get<ApiResponse<TodaysIssues>>('/insights/today/').then(extractData),
 
   getInsightDetail: (id: number) =>
-    axiosInstance.get<{ data: InsightDetail }>(`/insights/${id}/`).then(extractData),
+    axiosInstance.get<ApiResponse<InsightDetail>>(`/insights/${id}/`).then(extractData),
 
   updateInsightStatus: ({ id, ...data }: UpdateInsightStatusRequest & { id: number }) =>
-    axiosInstance.patch<{ data: Insight }>(`/insights/${id}/status/`, data).then(extractData),
+    axiosInstance.patch<ApiResponse<Insight>>(`/insights/${id}/status/`, data).then(extractData),
 
   getInsightHistory: (params: InsightHistoryParams) =>
-    axiosInstance.get<{ data: { insights: Insight[]; start_date: string; end_date: string } }>('/insights/history/', { params }).then(extractData),
+    axiosInstance.get<ApiResponse<{ insights: Insight[]; start_date: string; end_date: string }>>('/insights/history/', { params }).then(extractData),
 
   getDashboardSummary: () =>
-    axiosInstance.get<{ data: DashboardSummary }>('/dashboard/summary/').then(extractData),
+    axiosInstance.get<ApiResponse<DashboardSummary>>('/dashboard/summary/').then(extractData),
 };
 
 // Query keys
@@ -112,7 +112,7 @@ export const useUpdateInsightStatus = () => {
           insight: data,
         };
       });
-      
+
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: insightKeys.today() });
       queryClient.invalidateQueries({ queryKey: insightKeys.all });

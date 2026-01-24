@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { useStore } from '@/store/useStore';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1::8000/api';
 
@@ -15,11 +16,11 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('access_token');
-    
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error: AxiosError) => {
@@ -42,7 +43,7 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
       prom.resolve(token);
     }
   });
-  
+
   failedQueue = [];
 };
 
@@ -76,6 +77,7 @@ axiosInstance.interceptors.response.use(
         // No refresh token, logout
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        useStore.getState().clearTokens(); // Ensure store state is cleared
         window.location.href = '/login';
         return Promise.reject(error);
       }
@@ -86,11 +88,12 @@ axiosInstance.interceptors.response.use(
         });
 
         const { access, refresh } = response.data;
-        
+
         localStorage.setItem('access_token', access);
         if (refresh) {
           localStorage.setItem('refresh_token', refresh);
         }
+        useStore.getState().setTokens(access, refresh || refreshToken);
 
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${access}`;
@@ -103,14 +106,32 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError as AxiosError, null);
         isRefreshing = false;
-        
+
         // Refresh failed, logout
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        useStore.getState().clearTokens();
         window.location.href = '/login';
-        
+
         return Promise.reject(refreshError);
       }
+    }
+
+    // Global Error Notification
+    // We don't notify for 401s (handled above) or 404s (often handled by UI) unless critical?
+    // Let's notify for 500s and explicit bad requests that aren't validation errors handled by forms.
+    const status = error.response?.status;
+    const message = (error.response?.data as any)?.error?.message || error.message || 'An unexpected error occurred';
+
+    if (status && status >= 500) {
+      useStore.getState().addNotification('error', `Server Error: ${message}`);
+    } else if (status === 403) {
+      useStore.getState().addNotification('error', `Permission Denied: ${message}`);
+    } else if (status === 429) {
+      useStore.getState().addNotification('warning', 'Too many requests. Please try again later.');
+    } else if (!status) {
+      // Network error
+      useStore.getState().addNotification('error', 'Network Error. Please check your connection.');
     }
 
     return Promise.reject(error);

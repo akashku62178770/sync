@@ -25,7 +25,7 @@
 
 // export const useLogout = () => {
 //   const queryClient = useQueryClient();
-  
+
 //   return useMutation({
 //     mutationFn: async () => {
 //       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -39,7 +39,7 @@
 
 // export const useUpdateProfile = () => {
 //   const queryClient = useQueryClient();
-  
+
 //   return useMutation({
 //     mutationFn: async (data: Partial<User>) => {
 //       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -82,7 +82,7 @@
 // Give by claude 
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { axiosInstance, extractData } from '@/lib/axios';
+import { axiosInstance, extractData, ApiResponse } from '@/lib/axios';
 import { useStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
 import type {
@@ -95,19 +95,19 @@ import type {
 
 // API functions
 const authApi = {
-   login: (data: { email: string; password: string }) =>
-    axiosInstance.post<{ data: LoginResponse }>('/auth/login/', data).then(extractData),
+  login: (data: { email: string; password: string }) =>
+    axiosInstance.post<ApiResponse<LoginResponse>>('/auth/login/', data).then(extractData),
   register: (data: RegisterRequest) =>
-    axiosInstance.post<{ data: LoginResponse }>('/auth/register/', data).then(extractData),
+    axiosInstance.post<ApiResponse<LoginResponse>>('/auth/register/', data).then(extractData),
 
   googleAuth: (data: GoogleAuthRequest) =>
-    axiosInstance.post<{ data: LoginResponse }>('/auth/google/', data).then(extractData),
+    axiosInstance.post<ApiResponse<LoginResponse>>('/auth/google/', data).then(extractData),
 
   getCurrentUser: () =>
-    axiosInstance.get<{ data: User }>('/auth/user/').then(extractData),
+    axiosInstance.get<ApiResponse<User>>('/auth/user/').then(extractData),
 
   updateProfile: (data: UpdateProfileRequest) =>
-    axiosInstance.patch<{ data: User }>('/auth/profile/', data).then(extractData),
+    axiosInstance.patch<ApiResponse<User>>('/auth/profile/', data).then(extractData),
 
   logout: (refreshToken: string) =>
     axiosInstance.post('/auth/logout/', { refresh: refreshToken }),
@@ -135,14 +135,17 @@ export const authKeys = {
 //   });
 // };
 export const useLogin = () => {
+  const { setTokens } = useStore();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async (data: { email: string; password: string }) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { user: mockUser, tokens: { access: 'token', refresh: 'refresh' } };
+    mutationFn: authApi.login,
+    onSuccess: (data) => {
+      setTokens(data.tokens.access, data.tokens.refresh);
+      queryClient.setQueryData(authKeys.user(), data.user);
+      navigate('/dashboard');
     },
-    // Remove any onSuccess/onError here - let component handle it
   });
 };
 
@@ -184,7 +187,7 @@ export const useGoogleAuth = () => {
     onSuccess: (data) => {
       setTokens(data.tokens.access, data.tokens.refresh);
       queryClient.setQueryData(authKeys.user(), data.user);
-      
+
       if (data.is_new_user) {
         navigate('/onboarding');
       } else {

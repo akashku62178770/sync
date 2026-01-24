@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-
+import { toast } from 'sonner';
+// import { toast } from '@/hooks/use-toast';
 // Auth slice
 interface AuthSlice {
   isAuthenticated: boolean;
@@ -111,18 +112,22 @@ export const useStore = create<Store>()(
 
         // Notifications
         notifications: [],
-        addNotification: (type, message) =>
+        addNotification: (type, message) => {
+            console.log(type, message);
+          if (type === 'success') toast.success(message);
+          else if (type === 'error') toast.error(message);
+          else if (type === 'warning') toast.warning(message);
+          else toast.info(message);
+          
           set((state) => ({
-            notifications: [
-              ...state.notifications,
-              {
-                id: crypto.randomUUID(),
-                type,
-                message,
-                timestamp: Date.now(),
-              },
-            ],
-          })),
+            notifications: [...state.notifications, {
+              id: crypto.randomUUID(),
+              type,
+              message,
+              timestamp: Date.now(),
+            }],
+          }));
+        },
         removeNotification: (id) =>
           set((state) => ({
             notifications: state.notifications.filter((n) => n.id !== id),

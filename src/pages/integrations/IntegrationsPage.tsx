@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Link2,
@@ -185,11 +185,19 @@ function IntegrationCard({
 }
 
 export default function IntegrationsPage() {
-  console.log("Rendering IntegrationsPage", import.meta.env.VITE_GOOGLE_CLIENT_ID);
+  // console.log("Rendering IntegrationsPage", import.meta.env.VITE_GOOGLE_CLIENT_ID);
   const { addNotification } = useNotifications();
   const { data: integrations, isLoading } = useIntegrations();
   const { data: gaProperties } = useGAProperties();
   const { data: metaAccounts } = useMetaAccounts();
+
+  const integrationsMap = useMemo(() => {
+    if (!integrations) return {};
+    return integrations.reduce((acc, integration) => {
+      acc[integration.provider] = integration;
+      return acc;
+    }, {} as Record<string, typeof integrations[0]>);
+  }, [integrations]);
 
   const connectGoogle = useConnectGoogle();
   const connectMeta = useConnectMeta();
@@ -257,13 +265,18 @@ export default function IntegrationsPage() {
       window.addEventListener('message', handler);
 
       const timer = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(timer);
-          window.removeEventListener('message', handler);
-          if (!isResolved) {
-            // User closed the window without finishing
-            // We can just ignore or reject.
+        try {
+          if (popup.closed) {
+            clearInterval(timer);
+            window.removeEventListener('message', handler);
+            if (!isResolved) {
+              // User closed the window without finishing
+              // We can just ignore or reject.
+            }
           }
+        } catch (error) {
+          // Ignore COOP block errors - we can't check if window is closed
+          // The auth flow will still work via postMessage
         }
       }, 500);
     });
@@ -277,6 +290,7 @@ export default function IntegrationsPage() {
     }
 
     const redirectUri = `${window.location.origin}/integrations/google/callback`;
+    // const redirectUri = `${window.location.origin}/auth/google/callback`;
     const scope = "https://www.googleapis.com/auth/analytics.readonly";
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
 
@@ -406,9 +420,9 @@ export default function IntegrationsPage() {
           name="Google Analytics"
           description="Connect GA4 to track website performance"
           icon={<GoogleIcon />}
-          connected={!!integrations?.google}
-          status={integrations?.google?.status}
-          accountName={integrations?.google?.name}
+          connected={!!integrationsMap?.google}
+          status={integrationsMap?.google?.is_active ? 'active' : 'error'}
+          accountName={integrationsMap?.google?.name}
           onConnect={handleGoogleConnect}
           onDisconnect={() => handleDisconnect('google')}
           onSettings={() => setShowGAModal(true)}
@@ -419,9 +433,9 @@ export default function IntegrationsPage() {
           name="Meta Ads"
           description="Connect Meta to track ad performance"
           icon={<MetaIcon />}
-          connected={!!integrations?.meta}
-          status={integrations?.meta?.status}
-          accountName={integrations?.meta?.name}
+          connected={!!integrationsMap?.meta}
+          status={integrationsMap?.meta?.is_active ? 'active' : 'error'}
+          accountName={integrationsMap?.meta?.name}
           onConnect={handleMetaConnect}
           onDisconnect={() => handleDisconnect('meta')}
           onSettings={() => setShowMetaModal(true)}
@@ -432,9 +446,9 @@ export default function IntegrationsPage() {
           name="Microsoft Clarity"
           description="Connect Clarity for session recordings"
           icon={<ClarityIcon />}
-          connected={!!integrations?.clarity}
-          status={integrations?.clarity?.status}
-          accountName={integrations?.clarity?.name}
+          connected={!!integrationsMap?.clarity}
+          status={integrationsMap?.clarity?.is_active ? 'active' : 'error'}
+          accountName={integrationsMap?.clarity?.name}
           onConnect={() => setShowClarityModal(true)}
           onDisconnect={() => handleDisconnect('clarity')}
           isPending={connectClarity.isPending}
@@ -457,18 +471,18 @@ export default function IntegrationsPage() {
                 className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent"
               >
                 <Checkbox
-                  checked={selectedProperties.includes(prop.id)}
+                  checked={selectedProperties.includes(prop.property_id)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedProperties([...selectedProperties, prop.id]);
+                      setSelectedProperties([...selectedProperties, prop.property_id]);
                     } else {
-                      setSelectedProperties(selectedProperties.filter((id) => id !== prop.id));
+                      setSelectedProperties(selectedProperties.filter((id) => id !== prop.property_id));
                     }
                   }}
                 />
                 <div className="flex-1">
                   <p className="font-medium">{prop.name}</p>
-                  <p className="text-sm text-muted-foreground">{prop.website_url}</p>
+                  <p className="text-sm text-muted-foreground">{prop.property_id}</p>
                 </div>
               </label>
             ))}
@@ -498,12 +512,12 @@ export default function IntegrationsPage() {
                 className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent"
               >
                 <Checkbox
-                  checked={selectedAccounts.includes(account.id)}
+                  checked={selectedAccounts.includes(account.ad_account_id)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedAccounts([...selectedAccounts, account.id]);
+                      setSelectedAccounts([...selectedAccounts, account.ad_account_id]);
                     } else {
-                      setSelectedAccounts(selectedAccounts.filter((id) => id !== account.id));
+                      setSelectedAccounts(selectedAccounts.filter((id) => id !== account.ad_account_id));
                     }
                   }}
                 />

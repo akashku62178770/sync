@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { axiosInstance, extractData } from '@/lib/axios';
+import { axiosInstance, extractData, type ApiResponse } from '@/lib/axios';
 import type {
   IntegrationAccount,
   GAProperty,
@@ -10,36 +10,37 @@ import type {
   ConnectMetaResponse,
   ConnectClarityRequest,
   SelectPropertiesRequest,
+  SelectMetaAccountsRequest,
 } from '@/types/api';
 
 // API functions
-const integrationApi = { 
+const integrationApi = {
   listIntegrations: () =>
-    axiosInstance.get<{ data: IntegrationAccount[] }>('/integrations/').then(extractData),
+    axiosInstance.get<ApiResponse<IntegrationAccount[]>>('/integrations/').then(extractData),
 
   connectGoogle: (data: ConnectGoogleRequest) =>
-    axiosInstance.post<{ data: ConnectGoogleResponse }>('/integrations/google/connect/', data).then(extractData),
+    axiosInstance.post<ApiResponse<ConnectGoogleResponse>>('/integrations/google/connect/', data).then(extractData),
 
   connectMeta: (data: ConnectMetaRequest) =>
-    axiosInstance.post<{ data: ConnectMetaResponse }>('/integrations/meta/connect/', data).then(extractData),
+    axiosInstance.post<ApiResponse<ConnectMetaResponse>>('/integrations/meta/connect/', data).then(extractData),
 
   connectClarity: (data: ConnectClarityRequest) =>
-    axiosInstance.post<{ data: { integration: IntegrationAccount } }>('/integrations/clarity/connect/', data).then(extractData),
+    axiosInstance.post<ApiResponse<{ integration: IntegrationAccount }>>('/integrations/clarity/connect/', data).then(extractData),
 
   disconnectIntegration: (provider: string) =>
     axiosInstance.delete(`/integrations/${provider}/disconnect/`),
 
   listGAProperties: () =>
-    axiosInstance.get<{ data: GAProperty[] }>('/ga/properties/').then(extractData),
+    axiosInstance.get<ApiResponse<GAProperty[]>>('/ga/properties/').then(extractData),
 
   selectGAProperties: (data: SelectPropertiesRequest) =>
-    axiosInstance.post<{ data: GAProperty[] }>('/ga/properties/select/', data).then(extractData),
+    axiosInstance.post<ApiResponse<GAProperty[]>>('/ga/properties/select/', data).then(extractData),
 
   listMetaAccounts: () =>
-    axiosInstance.get<{ data: MetaAdAccount[] }>('/meta/accounts/').then(extractData),
+    axiosInstance.get<ApiResponse<MetaAdAccount[]>>('/meta/accounts/').then(extractData),
 
-  selectMetaAccounts: (data: SelectPropertiesRequest) =>
-    axiosInstance.post<{ data: MetaAdAccount[] }>('/meta/accounts/select/', data).then(extractData),
+  selectMetaAccounts: (data: SelectMetaAccountsRequest) =>
+    axiosInstance.post<ApiResponse<MetaAdAccount[]>>('/meta/accounts/select/', data).then(extractData),
 };
 
 // Query keys
@@ -64,7 +65,8 @@ export const useConnectGoogle = () => {
 
   return useMutation({
     mutationFn: integrationApi.connectGoogle,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Google connected:", data);
       queryClient.invalidateQueries({ queryKey: integrationKeys.list() });
     },
   });
@@ -75,7 +77,8 @@ export const useConnectMeta = () => {
 
   return useMutation({
     mutationFn: integrationApi.connectMeta,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Meta connected:", data);
       queryClient.invalidateQueries({ queryKey: integrationKeys.list() });
     },
   });
@@ -86,7 +89,8 @@ export const useConnectClarity = () => {
 
   return useMutation({
     mutationFn: integrationApi.connectClarity,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Clarity connected:", data);
       queryClient.invalidateQueries({ queryKey: integrationKeys.list() });
     },
   });
@@ -97,7 +101,8 @@ export const useDisconnectIntegration = () => {
 
   return useMutation({
     mutationFn: integrationApi.disconnectIntegration,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Integration disconnected:", data);
       queryClient.invalidateQueries({ queryKey: integrationKeys.list() });
       queryClient.invalidateQueries({ queryKey: integrationKeys.gaProperties() });
       queryClient.invalidateQueries({ queryKey: integrationKeys.metaAccounts() });
@@ -118,7 +123,8 @@ export const useSelectGAProperties = () => {
 
   return useMutation({
     mutationFn: integrationApi.selectGAProperties,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("GA properties selected:", data);
       queryClient.invalidateQueries({ queryKey: integrationKeys.gaProperties() });
     },
   });
@@ -137,7 +143,8 @@ export const useSelectMetaAccounts = () => {
 
   return useMutation({
     mutationFn: integrationApi.selectMetaAccounts,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Meta accounts selected:", data);
       queryClient.invalidateQueries({ queryKey: integrationKeys.metaAccounts() });
     },
   });

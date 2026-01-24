@@ -1,7 +1,7 @@
 // User types
 export interface User {
   id: number;
-  username: string;
+  username: string; 
   email: string;
   plan_type: 'free' | 'pro' | 'enterprise';
   is_premium: boolean;
@@ -46,6 +46,7 @@ export interface MetaAdAccount {
   name: string;
   integration_account: number;
   integration_account_name: string;
+  currency?: string;
   created_at: string;
 }
 
@@ -142,6 +143,13 @@ export interface DashboardSummary {
     spend: number;
     conversion_rate: number;
   };
+  metrics_change?: {
+    sessions: number;
+    conversions: number;
+    revenue: number;
+    spend: number;
+    conversion_rate: number;
+  };
   date: string;
 }
 
@@ -155,6 +163,7 @@ export interface RegisterRequest {
 
 export interface GoogleAuthRequest {
   code: string;
+
 }
 
 export interface UpdateProfileRequest {
@@ -166,7 +175,7 @@ export interface ConnectGoogleRequest {
 }
 
 export interface ConnectMetaRequest {
-  access_token: string;
+  code: string;
 }
 
 export interface ConnectClarityRequest {
@@ -176,6 +185,10 @@ export interface ConnectClarityRequest {
 
 export interface SelectPropertiesRequest {
   property_ids: string[];
+}
+
+export interface SelectMetaAccountsRequest {
+  account_ids: string[];
 }
 
 export interface UpdateInsightStatusRequest {

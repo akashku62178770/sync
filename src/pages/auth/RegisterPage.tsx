@@ -23,20 +23,27 @@ export default function RegisterPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      addNotification('error', 'Passwords do not match');
-      return;
-    }
+    // if (formData.password !== formData.confirmPassword) {
+    //   addNotification('error', 'Passwords do not match');
+    //   return;
+    // }
 
     register.mutate(
-      { username: formData.username, email: formData.email, password: formData.password },
+      { username: formData.username, email: formData.email, password: formData.password, password2: formData.confirmPassword },
       {
         onSuccess: () => {
           addNotification('success', 'Account created! Welcome to Insightly.');
           navigate('/onboarding');
         },
-        onError: () => {
-          addNotification('error', 'Registration failed');
+        onError: (error: any) => {
+          console.error('Registration error:', error);
+          addNotification(
+            'error',
+            error?.response?.data?.error?.detail?.username?.[0] ||
+              error?.response?.data?.error?.detail?.email?.[0] ||
+              error?.response?.data?.error?.detail?.password?.[0] ||
+              'Registration failed'
+          );
         },
       }
     );

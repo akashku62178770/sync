@@ -39,6 +39,7 @@ export function DashboardLayout() {
   const { sidebarOpen, toggleSidebar } = useUI();
   const { notifications } = useNotifications();
   // const addNotification = useStore((state) => state.addNotification);
+  // const addNotification = useStore();
 
   const { data: user } = useCurrentUser();
   const logout = useLogout();

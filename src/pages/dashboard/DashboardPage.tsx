@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  Target, 
-  DollarSign, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Target,
+  DollarSign,
   CreditCard,
   AlertCircle,
   ArrowRight,
@@ -28,16 +28,16 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
-function MetricCard({ 
-  label, 
-  value, 
-  change, 
-  icon: Icon, 
-  format = 'number' 
-}: { 
-  label: string; 
-  value: number; 
-  change: number; 
+function MetricCard({
+  label,
+  value,
+  change,
+  icon: Icon,
+  format = 'number'
+}: {
+  label: string;
+  value: number;
+  change: number;
   icon: React.ComponentType<{ className?: string }>;
   format?: 'number' | 'currency' | 'percent';
 }) {
@@ -125,7 +125,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="p-6 lg:p-8 space-y-8"
       variants={container}
       initial="hidden"
@@ -141,28 +141,28 @@ export default function DashboardPage() {
 
       {/* Metrics Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard 
-          label="Total Sessions" 
-          value={summary?.metrics?.sessions} 
+        <MetricCard
+          label="Total Sessions"
+          value={summary?.metrics?.sessions}
           change={summary?.metrics_change?.sessions}
           icon={Users}
         />
-        <MetricCard 
-          label="Conversions" 
-          value={summary?.metrics?.conversions} 
+        <MetricCard
+          label="Conversions"
+          value={summary?.metrics?.conversions}
           change={summary?.metrics_change?.conversions}
           icon={Target}
         />
-        <MetricCard 
-          label="Revenue" 
-          value={summary?.metrics?.revenue} 
+        <MetricCard
+          label="Revenue"
+          value={summary?.metrics?.revenue}
           change={summary?.metrics_change?.revenue}
           icon={DollarSign}
           format="currency"
         />
-        <MetricCard 
-          label="Conversion Rate" 
-          value={summary?.metrics?.conversion_rate} 
+        <MetricCard
+          label="Conversion Rate"
+          value={summary?.metrics?.conversion_rate}
           change={summary?.metrics_change?.conversion_rate}
           icon={Zap}
           format="percent"
@@ -191,7 +191,7 @@ export default function DashboardPage() {
                 </Button>
               </Link>
             </div>
-            
+
             <div className="p-5">
               {/* Severity breakdown */}
               <div className="flex flex-wrap gap-3 mb-6">
@@ -202,19 +202,18 @@ export default function DashboardPage() {
 
               {/* Recent issues preview */}
               <div className="space-y-3">
-                {issues?.issues?.slice(0, 3).map((issue) => (
-                  <Link 
-                    key={issue?.id} 
+                {issues?.insights?.slice(0, 3).map((issue) => (
+                  <Link
+                    key={issue?.id}
                     to={`/issues/${issue?.id}`}
                     className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                   >
-                    <div className={`h-2 w-2 rounded-full ${
-                      issue?.severity === 'high' ? 'bg-severity-high' : 
-                      issue?.severity === 'medium' ? 'bg-severity-medium' : 
-                      'bg-severity-low'
-                    }`} />
+                    <div className={`h-2 w-2 rounded-full ${issue?.severity === 'high' ? 'bg-severity-high' :
+                        issue?.severity === 'medium' ? 'bg-severity-medium' :
+                          'bg-severity-low'
+                      }`} />
                     <span className="flex-1 text-sm font-medium truncate">{issue?.title}</span>
-                    <span className="text-xs text-muted-foreground capitalize">{issue?.source}</span>
+                    <span className="text-xs text-muted-foreground capitalize">{issue?.ga_property_name || 'System'}</span>
                   </Link>
                 ))}
               </div>
@@ -226,7 +225,7 @@ export default function DashboardPage() {
         <motion.div variants={item}>
           <div className="rounded-xl border bg-card p-5 h-full">
             <h2 className="font-semibold mb-4">This Week</h2>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b">
                 <span className="text-sm text-muted-foreground">Total Issues</span>
