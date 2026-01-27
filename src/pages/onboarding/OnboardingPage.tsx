@@ -217,12 +217,12 @@ export default function OnboardingPage() {
                       className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent"
                     >
                       <Checkbox
-                        checked={selectedProperties.includes(prop.id)}
+                        checked={selectedProperties.includes(String(prop.id))}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedProperties([...selectedProperties, prop.id]);
+                            setSelectedProperties([...selectedProperties, String(prop.id)]);
                           } else {
-                            setSelectedProperties(selectedProperties.filter((id) => id !== prop.id));
+                            setSelectedProperties(selectedProperties.filter((id) => id !== String(prop.id)));
                           }
                         }}
                       />
@@ -277,12 +277,12 @@ export default function OnboardingPage() {
                       className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent"
                     >
                       <Checkbox
-                        checked={selectedAccounts.includes(account.id)}
+                        checked={selectedAccounts.includes(String(account.id))}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedAccounts([...selectedAccounts, account.id]);
+                            setSelectedAccounts([...selectedAccounts, String(account.id)]);
                           } else {
-                            setSelectedAccounts(selectedAccounts.filter((id) => id !== account.id));
+                            setSelectedAccounts(selectedAccounts.filter((id) => id !== String(account.id)));
                           }
                         }}
                       />

@@ -35,6 +35,7 @@ export interface GAProperty {
   id: number;
   property_id: string;
   name: string;
+  website_url?: string;
   integration_account: number;
   integration_account_name: string;
   created_at: string;

@@ -18,18 +18,20 @@ export default function LoginPage() {
   const clientId = "616678010160-rtfbp3m2mdcc8gm0cgfq4lvkqpc5r7u8.apps.googleusercontent.com";
 
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(formData);
     login.mutate(formData, {
       onSuccess: () => {
         addNotification('success', 'Welcome back!');
         navigate('/dashboard');
       },
-      onError: () => {
+      onError: (err) => {
+        console.log(err);
         addNotification('error', 'Invalid credentials');
       },
     });
@@ -43,7 +45,7 @@ export default function LoginPage() {
     // const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&redirect_uri=${window.location.origin}/auth/google/callback&response_type=code&scope=email profile`;
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${window.location.origin}/auth/google/callback&response_type=code&scope=email profile`;
     window.location.href = googleAuthUrl;
-    
+
   };
 
   return (
@@ -59,16 +61,16 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Email or username</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
+              id="username"
+              type="text"
+              placeholder="Enter email or username"
               className="pl-10"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               required
             />
           </div>

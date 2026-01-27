@@ -95,7 +95,7 @@ import type {
 
 // API functions
 const authApi = {
-  login: (data: { email: string; password: string }) =>
+  login: (data: { username: string; password: string }) =>
     axiosInstance.post<ApiResponse<LoginResponse>>('/auth/login/', data).then(extractData),
   register: (data: RegisterRequest) =>
     axiosInstance.post<ApiResponse<LoginResponse>>('/auth/register/', data).then(extractData),

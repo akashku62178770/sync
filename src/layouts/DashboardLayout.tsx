@@ -98,8 +98,7 @@ export function DashboardLayout() {
                   `nav-link ${isActive ? 'nav-link-active' : ''}`
                 }
               >
-                <item.icon className="h-5 w-5" />
-                {item.label}
+                <span className="ml-2"><item.icon className="h-5 w-5 shrink-0" /> {item.label}</span>
               </NavLink>
             ))}
           </nav>
