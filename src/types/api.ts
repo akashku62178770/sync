@@ -1,7 +1,7 @@
 // User types
 export interface User {
   id: number;
-  username: string; 
+  username: string;
   email: string;
   plan_type: 'free' | 'pro' | 'enterprise';
   is_premium: boolean;
@@ -76,6 +76,7 @@ export interface Insight {
   date: string;
   severity: InsightSeverity;
   title: string;
+  source: 'ga4' | 'meta' | 'clarity';
   explanation: string;
   recommended_action: string;
   metadata: Record<string, unknown>;
@@ -103,6 +104,7 @@ export interface DailyMetric {
   conversions: number;
   revenue: number;
   spend: number;
+  page_path?: string;
   is_anomaly: boolean;
   anomaly_type?: string;
 }

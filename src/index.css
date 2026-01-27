@@ -139,6 +139,18 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+.stat-change-positive {
+  color: var(--color-success);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.stat-change-negative {
+  color: var(--color-destructive);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
  
 
 .animate-fade-in {

@@ -14,6 +14,7 @@ import { useDashboardSummary, useTodaysIssues } from '@/hooks/api/useInsights';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const container = {
   hidden: { opacity: 0 },
@@ -169,6 +170,66 @@ export default function DashboardPage() {
         />
       </div>
 
+      {/* 7-Day Trend */}
+      <motion.div variants={item} className="rounded-xl border bg-card p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-semibold">7-Day Trend</h2>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-primary" /> Sessions</span>
+          </div>
+        </div>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={[
+              { name: 'Mon', value: 2400 },
+              { name: 'Tue', value: 3800 },
+              { name: 'Wed', value: 6800 },
+              { name: 'Thu', value: 5200 },
+              { name: 'Fri', value: 7800 },
+              { name: 'Sat', value: 4800 },
+              { name: 'Sun', value: 6100 },
+            ]}>
+              <defs>
+                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                dy={10}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                dx={-10}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  borderColor: 'hsl(var(--border))',
+                  borderRadius: '0.5rem',
+                }}
+                itemStyle={{ color: 'hsl(var(--foreground))' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorValue)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
+
       {/* Issues & Quick Actions */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Today's Issues Summary */}
@@ -209,8 +270,8 @@ export default function DashboardPage() {
                     className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                   >
                     <div className={`h-2 w-2 rounded-full ${issue?.severity === 'high' ? 'bg-severity-high' :
-                        issue?.severity === 'medium' ? 'bg-severity-medium' :
-                          'bg-severity-low'
+                      issue?.severity === 'medium' ? 'bg-severity-medium' :
+                        'bg-severity-low'
                       }`} />
                     <span className="flex-1 text-sm font-medium truncate">{issue?.title}</span>
                     <span className="text-xs text-muted-foreground capitalize">{issue?.ga_property_name || 'System'}</span>

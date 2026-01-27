@@ -1,9 +1,9 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  AlertCircle, 
-  AlertTriangle, 
+import {
+  ArrowLeft,
+  AlertCircle,
+  AlertTriangle,
   Info,
   Clock,
   Timer,
@@ -90,14 +90,14 @@ export default function InsightDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
-  const { data, isLoading, error } = useInsightDetail(id || '');
+  const { data, isLoading, error } = useInsightDetail(id ? parseInt(id) : 0);
   const updateStatus = useUpdateInsightStatus();
 
   const handleStatusUpdate = (newStatus: InsightStatus) => {
     if (!id) return;
-    
+
     updateStatus.mutate(
-      { id, status: newStatus },
+      { id: parseInt(id), status: newStatus },
       {
         onSuccess: () => {
           const messages = {
@@ -132,7 +132,7 @@ export default function InsightDetailPage() {
   const { insight, metrics, clarity_signals, recordings } = data;
 
   return (
-    <motion.div 
+    <motion.div
       className="p-6 lg:p-8 space-y-6"
       variants={container}
       initial="hidden"
@@ -140,8 +140,8 @@ export default function InsightDetailPage() {
     >
       {/* Back button */}
       <motion.div variants={item}>
-        <Link 
-          to="/issues" 
+        <Link
+          to="/issues"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -163,14 +163,14 @@ export default function InsightDetailPage() {
             </div>
             <h1 className="text-xl font-bold">{insight.title}</h1>
           </div>
-          
+
           {/* Action buttons */}
           <div className="flex gap-2">
             {insight.status === 'active' && (
               <>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="gap-2"
                   onClick={() => handleStatusUpdate('snoozed')}
                   disabled={updateStatus.isPending}
@@ -178,8 +178,8 @@ export default function InsightDetailPage() {
                   <Timer className="h-4 w-4" />
                   Snooze 24h
                 </Button>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="gap-2"
                   onClick={() => handleStatusUpdate('resolved')}
                   disabled={updateStatus.isPending}
@@ -190,9 +190,9 @@ export default function InsightDetailPage() {
               </>
             )}
             {insight.status === 'snoozed' && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="gap-2"
                 onClick={() => handleStatusUpdate('active')}
                 disabled={updateStatus.isPending}
@@ -202,9 +202,9 @@ export default function InsightDetailPage() {
               </Button>
             )}
             {insight.status === 'resolved' && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="gap-2"
                 onClick={() => handleStatusUpdate('active')}
                 disabled={updateStatus.isPending}
@@ -221,7 +221,7 @@ export default function InsightDetailPage() {
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Explanation</h3>
             <p className="text-foreground">{insight.explanation}</p>
           </div>
-          
+
           <div className="pt-4 border-t">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Recommended Action</h3>
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
@@ -256,7 +256,7 @@ export default function InsightDetailPage() {
                       {new Date(metric.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </TableCell>
                     <TableCell className="font-medium text-sm truncate max-w-[120px]">
-                      {metric.page}
+                      {metric.page_path || 'Unknown'}
                     </TableCell>
                     <TableCell className="text-right">{metric.sessions.toLocaleString()}</TableCell>
                     <TableCell className="text-right">{metric.conversions}</TableCell>
@@ -290,14 +290,13 @@ export default function InsightDetailPage() {
                       Dead
                     </span>
                   </TableHead>
-                  <TableHead className="text-right">Quick Back</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {clarity_signals.map((signal, i) => (
                   <TableRow key={i}>
                     <TableCell className="font-medium text-sm truncate max-w-[140px]">
-                      {signal.page}
+                      {signal.page_path}
                     </TableCell>
                     <TableCell className="text-right">
                       <span className={signal.rage_clicks > 50 ? 'text-destructive font-medium' : ''}>
@@ -305,7 +304,6 @@ export default function InsightDetailPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-right">{signal.dead_clicks}</TableCell>
-                    <TableCell className="text-right">{signal.quick_backs}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -326,7 +324,7 @@ export default function InsightDetailPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {recordings.map((recording) => (
               <a
-                key={recording.id}
+                key={recording.session_id}
                 href={recording.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -336,12 +334,9 @@ export default function InsightDetailPage() {
                   <PlayCircle className="h-5 w-5 text-source-clarity" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{recording.page}</p>
+                  <p className="text-sm font-medium truncate">{recording.page_path}</p>
                   <p className="text-xs text-muted-foreground">
-                    {Math.floor(recording.duration / 60)}:{(recording.duration % 60).toString().padStart(2, '0')}
-                    {recording.has_rage_click && (
-                      <span className="ml-2 text-destructive">• Rage click</span>
-                    )}
+                    Session {recording.session_id.slice(0, 8)}
                   </p>
                 </div>
                 <ExternalLink className="h-4 w-4 text-muted-foreground" />

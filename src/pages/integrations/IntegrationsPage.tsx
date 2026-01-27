@@ -97,6 +97,8 @@ interface IntegrationCardProps {
   onDisconnect: () => void;
   onSettings?: () => void;
   isPending?: boolean;
+  properties?: string[];
+  propertiesLabel?: string;
 }
 
 function IntegrationCard({
@@ -110,6 +112,8 @@ function IntegrationCard({
   onDisconnect,
   onSettings,
   isPending,
+  properties,
+  propertiesLabel,
 }: IntegrationCardProps) {
   return (
     <motion.div variants={item} className="rounded-xl border bg-card overflow-hidden">
@@ -140,6 +144,21 @@ function IntegrationCard({
           <div className="mt-4 p-3 rounded-lg bg-muted/50">
             <p className="text-sm font-medium">{accountName}</p>
             <p className="text-xs text-muted-foreground">Connected account</p>
+            {properties && properties.length > 0 && (
+              <div className="mt-2 pt-2 border-t border-border/50">
+                <p className="text-xs font-medium">{properties.length} {propertiesLabel}</p>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {properties.slice(0, 3).map((p, i) => (
+                    <span key={i} className="inline-flex items-center rounded-sm bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground border shadow-xs">
+                      {p}
+                    </span>
+                  ))}
+                  {properties.length > 3 && (
+                    <span className="text-[10px] text-muted-foreground">+{properties.length - 3} more</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -189,6 +208,7 @@ export default function IntegrationsPage() {
   const { addNotification } = useNotifications();
   const { data: integrations, isLoading } = useIntegrations();
   const { data: gaProperties } = useGAProperties();
+  console.log("gaProperties", gaProperties);
   const { data: metaAccounts } = useMetaAccounts();
 
   const integrationsMap = useMemo(() => {
@@ -427,6 +447,10 @@ export default function IntegrationsPage() {
           onDisconnect={() => handleDisconnect('google')}
           onSettings={() => setShowGAModal(true)}
           isPending={connectGoogle.isPending}
+          properties={gaProperties
+            ?.filter(p => integrationsMap.google && p.integration_account === integrationsMap.google.id)
+            .map(p => p.name)}
+          propertiesLabel="Properties"
         />
 
         <IntegrationCard
@@ -440,6 +464,10 @@ export default function IntegrationsPage() {
           onDisconnect={() => handleDisconnect('meta')}
           onSettings={() => setShowMetaModal(true)}
           isPending={connectMeta.isPending}
+          properties={metaAccounts
+            ?.filter(a => integrationsMap.meta && a.integration_account === integrationsMap.meta.id)
+            .map(a => a.name)}
+          propertiesLabel="Ad Accounts"
         />
 
         <IntegrationCard

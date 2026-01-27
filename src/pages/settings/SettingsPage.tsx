@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { 
-  User, 
-  Settings, 
-  Bell, 
+import {
+  User,
+  Settings,
+  Bell,
   Palette,
   LogOut,
   Target,
@@ -64,14 +64,14 @@ function LoadingSkeleton() {
   );
 }
 
-function SettingsSection({ 
-  title, 
-  description, 
-  icon: Icon, 
-  children 
-}: { 
-  title: string; 
-  description: string; 
+function SettingsSection({
+  title,
+  description,
+  icon: Icon,
+  children
+}: {
+  title: string;
+  description: string;
   icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
 }) {
@@ -99,7 +99,9 @@ export default function SettingsPage() {
   const updateProfile = useUpdateProfile();
   const logout = useLogout();
   const { theme, setTheme } = useUI();
-  const { emailNotifications, setEmailNotifications } = useFeatureFlags();
+  const { features, setFeature } = useFeatureFlags();
+  const emailNotifications = features.emailNotifications;
+  const setEmailNotifications = (checked: boolean) => setFeature('emailNotifications', checked);
   const { addNotification } = useNotifications();
 
   const handleGoalChange = (goal: string) => {
@@ -123,7 +125,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="p-6 lg:p-8 space-y-6"
       variants={container}
       initial="hidden"

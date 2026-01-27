@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  AlertCircle, 
-  AlertTriangle, 
-  Info, 
+import {
+  AlertCircle,
+  AlertTriangle,
+  Info,
   ChevronRight,
   Clock,
   Filter
@@ -57,31 +57,30 @@ function IssueCard({ issue }: { issue: Insight }) {
     <motion.div variants={item}>
       <Link to={`/issues/${issue.id}`} className="insight-card block">
         <div className="flex items-start gap-4">
-          <div className={`mt-0.5 rounded-lg p-2 ${
-            issue.severity === 'high' ? 'bg-severity-high-bg' :
-            issue.severity === 'medium' ? 'bg-severity-medium-bg' :
-            'bg-severity-low-bg'
-          }`}>
+          <div className={`mt-0.5 rounded-lg p-2 ${issue.severity === 'high' ? 'bg-severity-high-bg' :
+              issue.severity === 'medium' ? 'bg-severity-medium-bg' :
+                'bg-severity-low-bg'
+            }`}>
             <SeverityIcon severity={issue.severity} />
           </div>
-          
+
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4">
               <h3 className="font-medium leading-snug">{issue.title}</h3>
               <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
             </div>
-            
+
             <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">
               {issue.explanation}
             </p>
-            
+
             <div className="mt-3 flex items-center gap-3">
               <SourceBadge source={issue.source} />
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
-                {new Date(issue.created_at).toLocaleTimeString('en-US', { 
-                  hour: 'numeric', 
-                  minute: '2-digit' 
+                {new Date(issue.created_at).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit'
                 })}
               </span>
             </div>
@@ -143,7 +142,7 @@ export default function IssuesPage() {
     );
   }
 
-  const issues = data?.issues || [];
+  const issues = data?.insights || [];
 
   return (
     <div className="p-6 lg:p-8">
@@ -168,20 +167,18 @@ export default function IssuesPage() {
             const count = issues.filter((i) => i.severity === severity).length;
             if (count === 0) return null;
             return (
-              <Badge 
-                key={severity} 
-                variant="outline" 
-                className={`gap-1.5 ${
-                  severity === 'high' ? 'border-severity-high/30 text-severity-high' :
-                  severity === 'medium' ? 'border-severity-medium/30 text-severity-medium' :
-                  'border-severity-low/30 text-severity-low'
-                }`}
+              <Badge
+                key={severity}
+                variant="outline"
+                className={`gap-1.5 ${severity === 'high' ? 'border-severity-high/30 text-severity-high' :
+                    severity === 'medium' ? 'border-severity-medium/30 text-severity-medium' :
+                      'border-severity-low/30 text-severity-low'
+                  }`}
               >
-                <span className={`h-2 w-2 rounded-full ${
-                  severity === 'high' ? 'bg-severity-high' :
-                  severity === 'medium' ? 'bg-severity-medium' :
-                  'bg-severity-low'
-                }`} />
+                <span className={`h-2 w-2 rounded-full ${severity === 'high' ? 'bg-severity-high' :
+                    severity === 'medium' ? 'bg-severity-medium' :
+                      'bg-severity-low'
+                  }`} />
                 {count} {severity}
               </Badge>
             );
